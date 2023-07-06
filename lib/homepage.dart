@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:patti_geb/barriers.dart';
-import 'package:patti_geb/caracter.dart';
+import 'package:patti_geb/player.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,189 +11,168 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static double caracYaxis = 0;
-  double time = 0;
+  static double playerY = 0;
+  double initialPos = playerY;
   double height = 0;
-  double initialHeight = caracYaxis;
+  double time = 0;
+  double gravity = -0.01; //how strong the gravity
+  double velocity = 10; // how strong the flying
+  double playerWidth = 0.2;
+  double playerHeight = 0.2;
+
+  //game settings
   bool gameHasStarted = false;
-  static double barrierXOne = 1;
-  double barrierXTwo = barrierXOne + 1.2;
+
+  //barrier variables
+  static List<double> barrierX = [2, 2 + 1.5];
+  static double barrierWith = 0.5;
+  List<List<double>> barrierHeight = [
+    //between 0-2 height of screen & [topHeight,bottomHeight]
+    [0.6, 0.4],
+    [0.4, 0.6],
+  ];
+
+  void startGame() {
+    gameHasStarted = true;
+    Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      height = gravity * time * time + velocity * time;
+
+      setState(() {
+        playerY = initialPos - height;
+      });
+
+      // check if player is dead
+      if (playerIsDead()) {
+        timer.cancel();
+        gameHasStarted = false;
+        _showDialog();
+      }
+
+      // Decrease velocity gradually
+      velocity -= 0.2;
+
+      // Time counter
+      time += 0.05;
+    });
+  }
+
+
+  void resetGame() {
+    Navigator.pop(context);
+    setState(() {
+      playerY = 0;
+      gameHasStarted = false;
+      time = 0;
+      initialPos = playerY;
+    });
+  }
+
+  void _showDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.black54,
+            title: const Center(
+              child: Text(
+                "GAME OVER",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            actions: [
+              GestureDetector(
+                onTap: resetGame,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(17),
+                      color: Colors.white,
+                      child: const Text(
+                        "PLAY AGAIN",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
 
   void flyUp() {
     setState(() {
       time = 0;
-      initialHeight = caracYaxis;
+      initialPos = playerY;
+     // velocity = 5;
     });
   }
 
-  void startGame() {
-    gameHasStarted = true;
-    Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      time += 0.05;
-      height = -4.9 * time * time + 2 * time;
-      setState(() {
-        caracYaxis = initialHeight - height;
-        barrierXOne -= 0.02;
-        barrierXTwo -= 0.02;
-      });
-      if (barrierXOne < -2) {
-        barrierXOne += 3.5;
-      } else {
-        barrierXOne -= 0.05;
+  bool playerIsDead() {
+    //check if player is dead ( hitting top or bottom)
+    if (playerY < -1 || playerY > 1) {
+      return true;
+    }
+
+    //check if player hits the barrier
+    for (int i = 0; i < barrierX.length; i++) {
+      if (barrierX[i] <= playerWidth &&
+          barrierX[i] + barrierWith >= -playerWidth &&
+          (playerY <= -1 + barrierHeight[i][0] ||
+              playerY + playerHeight >= 1 - barrierHeight[i][1])) {
+        return true;
       }
-      if (barrierXTwo < -2) {
-        barrierXOne += 3.5;
-      } else {
-        barrierXTwo -= 0.05;
-      }
-      if (caracYaxis > 1) {
-        timer.cancel();
-        gameHasStarted = false;
-      }
-    });
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        if (gameHasStarted) {
-          flyUp();
-        } else {
-          startGame();
-        }
-      },
+      onTap: gameHasStarted ? flyUp : startGame,
       child: Scaffold(
         body: Column(
           children: [
             Expanded(
                 flex: 3,
-                child: Stack(
-                  children: [
-                    AnimatedContainer(
-                      alignment: Alignment(0, caracYaxis), // x,y
-                      color: Colors.grey,
-                      duration: const Duration(milliseconds: 0),
-                      child: const MyCaracter(),
-                    ),
-                    Container(
-                      alignment: const Alignment(0, -0.3),
-                      child: gameHasStarted
-                          ? Text("")
-                          : Text(
-                              "TAP TO PLAY",
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
-                    ),
-                    AnimatedContainer(
-                      alignment: Alignment(barrierXOne, 1.1),
-                      duration: Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 200.0,
+                child: Container(
+                  color: Colors.blueAccent,
+                  child: Stack(
+                    children: [
+                      MyPlayer(
+                        playerY: playerY,
+                        playerWidth: playerWidth,
+                        playerHeight: playerHeight,
                       ),
-                    ),
-                    AnimatedContainer(
-                      alignment: Alignment(barrierXOne, -1.1),
-                      duration: Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 200.0,
+                      Container(
+                        alignment: const Alignment(0, -0.3),
+                        child: Text(
+                          gameHasStarted ? "" : "TAP TO PLAY",
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 20),
+                        ),
                       ),
-                    ),
-                    AnimatedContainer(
-                      alignment: Alignment(barrierXTwo, 1.1),
-                      duration: Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 150.0,
+                      MyBarrier(
+                        barrierX: barrierX[0],
+                        barrierWidth: barrierWith,
+                        barrierHeight: barrierHeight[0][0],
+                        isThisBottomBarrier: false,
                       ),
-                    ),
-                    AnimatedContainer(
-                      alignment: Alignment(barrierXTwo, -1.1),
-                      duration: Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 250.0,
+                      MyBarrier(
+                        barrierX: barrierX[0],
+                        barrierWidth: barrierWith,
+                        barrierHeight: barrierHeight[0][1],
+                        isThisBottomBarrier: false,
                       ),
-                    ),
-                    AnimatedContainer(
-                      alignment: Alignment(0, 1.1),
-                      duration: Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 200.0,
-                      ),
-                    ),
-                    AnimatedContainer(
-                      alignment: Alignment(0, -1.1),
-                      duration: Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 200.0,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )),
-            Container(
-              height: 15,
-              color: Colors.black,
-            ),
             Expanded(
-              child: Container(
-                color: Colors.brown,
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "SCORE",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "0",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "BEST",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "10",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: 25,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                child: Container(
+              color: Colors.grey,
+            )),
           ],
         ),
       ),
