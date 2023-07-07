@@ -10,14 +10,55 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   static double playerY = 0.0;
   double time = 0;
   double height = 0;
   double playerWidth = 0.2;
   double playerHeight = 0.2;
   double initialHeight = playerY;
+
   bool gameHasStarted = false;
+  bool isGamePaused = false;
+
+  // Barrier variables
+  static List<double> barrierX = [2, 2 + 1.5];
+  static double barrierWith = 0.5;
+  List<List<double>> barrierHeight = [
+    // Between 0-2 height of screen & [topHeight, bottomHeight]
+    [0.6, 0.4],
+    [0.4, 0.6],
+  ];
+
+  late AnimationController _animationController;
+  static double barrierSpeed = 0.02; // Adjust this value to control the speed
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 50),
+    )..addListener(() {
+      setState(() {
+        // Update barrierX positions if the game is not paused
+        if (gameHasStarted) {
+          barrierX[0] -= barrierSpeed;
+          barrierX[1] -= barrierSpeed;
+
+          // Check if barriers have gone off-screen and reset their positions
+          if (barrierX[0] < -2 - barrierWith) {
+            barrierX[0] = barrierX[1];
+            barrierHeight[0] = barrierHeight[1];
+          }
+          if (barrierX[1] < -2 - barrierWith) {
+            barrierX[1] = barrierX[0];
+            barrierHeight[1] = barrierHeight[0];
+          }
+        }
+      });
+    });
+  }
 
   void flyUp() {
     setState(() {
@@ -28,17 +69,98 @@ class _HomePageState extends State<HomePage> {
 
   void startGame() {
     gameHasStarted = true;
+    _animationController.repeat(); // Start the barrier animation
     Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      time += 0.05;
-      height = -4.9 * time * time + 2 * time;
-      setState(() {
-        playerY = initialHeight - height;
-      });
-      if (playerY > 1) {
-        timer.cancel();
-        gameHasStarted = false;
+      if (!isGamePaused) {
+        time += 0.05;
+        height = -3 * time * time + 2 * time;
+        setState(() {
+          playerY = initialHeight - height;
+        });
+
+        // check if player is dead
+        if (playerIsDead()) {
+          timer.cancel();
+          gameHasStarted = false;
+          _showDialog();
+        }
+
+        // Time counter
+        time += 0.05;
       }
     });
+  }
+
+  void resetGame() {
+    _animationController.stop(); // Stop the barrier animation
+    Navigator.pop(context);
+    setState(() {
+      playerY = 0;
+      gameHasStarted = false;
+      time = 0;
+      initialHeight = playerY;
+
+      // Reset barrier positions and heights
+      barrierX = [2, 2 + 1.5];
+      barrierHeight = [
+        [0.6, 0.4],
+        [0.4, 0.6],
+      ];
+    });
+  }
+
+  bool playerIsDead() {
+    // check if player is dead (hitting top or bottom)
+    if (playerY < -1 || playerY > 1) {
+      return true;
+    }
+
+    // check if player hits the barrier
+    for (int i = 0; i < barrierX.length; i++) {
+      if (barrierX[i] <= playerWidth &&
+          barrierX[i] + barrierWith >= -playerWidth &&
+          (playerY <= -1 + barrierHeight[i][0] ||
+              playerY + playerHeight >= 1 - barrierHeight[i][1])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _showDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black54,
+          title: const Center(
+            child: Text(
+              "GAME OVER",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          actions: [
+            GestureDetector(
+              onTap: resetGame,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(17),
+                    color: Colors.white,
+                    child: const Text(
+                      "PLAY AGAIN",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -55,33 +177,53 @@ class _HomePageState extends State<HomePage> {
         body: Column(
           children: [
             Expanded(
-                flex: 3,
-                child: Stack(
-                  children: [
-                    Container(
-                      color: Colors.grey,
-                      child: MyPlayer(playerY: playerY,
-                          playerWidth: playerWidth, playerHeight: playerHeight),
+              flex: 3,
+              child: Stack(
+                children: [
+                  Container(
+                    color: Colors.grey,
+                    child: MyPlayer(
+                      playerY: playerY,
+                      playerWidth: playerWidth,
+                      playerHeight: playerHeight,
                     ),
-                    Container(
-                      alignment: const Alignment(0, -0.3),
-                      child: gameHasStarted
-                          ? const Text("")
-                          : const Text(
-                              "TAP TO PLAY",
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
-                            ),
+                  ),
+                  Container(
+                    alignment: const Alignment(0, -0.3),
+                    child: gameHasStarted
+                        ? const Text("")
+                        : const Text(
+                      "TAP TO PLAY",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
-                    AnimatedContainer(
-                      alignment: const Alignment(0, 1.1),
-                      duration: const Duration(milliseconds: 0),
-                      child: MyBarrier(
-                        size: 200.0,
-                      ),
-                    ),
-                  ],
-                )),
+                  ),
+                  MyBarrier(
+                    barrierX: barrierX[0],
+                    barrierWidth: barrierWith,
+                    barrierHeight: barrierHeight[0][0],
+                    isThisBottomBarrier: false,
+                  ),
+                  MyBarrier(
+                    barrierX: barrierX[0],
+                    barrierWidth: barrierWith,
+                    barrierHeight: barrierHeight[0][1],
+                    isThisBottomBarrier: false,
+                  ),
+                  MyBarrier(
+                    barrierX: barrierX[1],
+                    barrierWidth: barrierWith,
+                    barrierHeight: barrierHeight[1][0],
+                    isThisBottomBarrier: false,
+                  ),
+                  MyBarrier(
+                    barrierX: barrierX[1],
+                    barrierWidth: barrierWith,
+                    barrierHeight: barrierHeight[1][1],
+                    isThisBottomBarrier: false,
+                  ),
+                ],
+              ),
+            ),
             Container(
               height: 15,
               color: Colors.black,
@@ -89,7 +231,7 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Container(
                 color: Colors.brown,
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
@@ -98,9 +240,10 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           "0",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(
                           height: 5,
@@ -108,9 +251,10 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           "SCORE",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(
                           height: 50,
@@ -123,9 +267,10 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           "10",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(
                           height: 5,
@@ -133,12 +278,13 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           "BEST",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         SizedBox(
-                          height:50 ,
+                          height: 50,
                         ),
                       ],
                     ),
