@@ -10,7 +10,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   static double playerY = 0.0;
   double time = 0;
   double height = 0;
@@ -18,8 +19,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   double playerHeight = 0.2;
   double initialHeight = playerY;
 
+  //game variables
   bool gameHasStarted = false;
   bool isGamePaused = false;
+  int bestScore = 0;
+  int actualScore = 0;
 
   // Barrier variables
   static List<double> barrierX = [2, 2 + 1.5];
@@ -40,24 +44,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
       duration: const Duration(milliseconds: 50),
     )..addListener(() {
-      setState(() {
-        // Update barrierX positions if the game is not paused
-        if (gameHasStarted) {
-          barrierX[0] -= barrierSpeed;
-          barrierX[1] -= barrierSpeed;
+        setState(() {
+          // Update barrierX positions if the game is not paused
+          if (gameHasStarted) {
+            barrierX[0] -= barrierSpeed;
+            barrierX[1] -= barrierSpeed;
 
-          // Check if barriers have gone off-screen and reset their positions
-          if (barrierX[0] < -2 - barrierWith) {
-            barrierX[0] = barrierX[1];
-            barrierHeight[0] = barrierHeight[1];
+            // Check if barriers have gone off-screen and reset their positions
+            if (barrierX[0] < -2 - barrierWith) {
+              barrierX[0] = barrierX[1];
+              barrierHeight[0] = barrierHeight[1];
+            }
+            if (barrierX[1] < -2 - barrierWith) {
+              barrierX[1] = barrierX[0];
+              barrierHeight[1] = barrierHeight[0];
+            }
           }
-          if (barrierX[1] < -2 - barrierWith) {
-            barrierX[1] = barrierX[0];
-            barrierHeight[1] = barrierHeight[0];
-          }
-        }
+        });
       });
-    });
   }
 
   void flyUp() {
@@ -69,8 +73,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void startGame() {
     gameHasStarted = true;
+    actualScore = 0; // Reset the actual score to 0
     _animationController.repeat(); // Start the barrier animation
-    Timer.periodic(const Duration(milliseconds: 50), (timer) {
+
+    Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (!isGamePaused) {
+        setState(() {
+          actualScore++; // Increment the actual score every second
+        });
+      }
+    });
+
+    Timer.periodic(const Duration(milliseconds: 50), (Timer timer) {
       if (!isGamePaused) {
         time += 0.05;
         height = -3 * time * time + 2 * time;
@@ -82,6 +96,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         if (playerIsDead()) {
           timer.cancel();
           gameHasStarted = false;
+          actualScore = 0;
           _showDialog();
         }
 
@@ -90,6 +105,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
     });
   }
+
 
   void resetGame() {
     _animationController.stop(); // Stop the barrier animation
@@ -100,6 +116,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       time = 0;
       initialHeight = playerY;
 
+      isGamePaused = true;
+
+      if (bestScore < actualScore) {
+        bestScore = actualScore;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('New Best Score: $bestScore'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      actualScore = 0;
+
       // Reset barrier positions and heights
       barrierX = [2, 2 + 1.5];
       barrierHeight = [
@@ -108,6 +137,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ];
     });
   }
+
 
   bool playerIsDead() {
     // check if player is dead (hitting top or bottom)
@@ -188,14 +218,87 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       playerHeight: playerHeight,
                     ),
                   ),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "BEST",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 2,
+                                ),
+                                Text(
+                                  bestScore.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 50,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const Spacer(), // Add space between the score and best text
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 16, top: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "SCORE",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  actualScore.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 50,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Container(
                     alignment: const Alignment(0, -0.3),
                     child: gameHasStarted
                         ? const Text("")
                         : const Text(
-                      "TAP TO PLAY",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
+                            "TAP TO PLAY",
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                   ),
                   MyBarrier(
                     barrierX: barrierX[0],
@@ -207,7 +310,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     barrierX: barrierX[0],
                     barrierWidth: barrierWith,
                     barrierHeight: barrierHeight[0][1],
-                    isThisBottomBarrier: false,
+                    isThisBottomBarrier: true,
                   ),
                   MyBarrier(
                     barrierX: barrierX[1],
@@ -219,74 +322,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     barrierX: barrierX[1],
                     barrierWidth: barrierWith,
                     barrierHeight: barrierHeight[1][1],
-                    isThisBottomBarrier: false,
+                    isThisBottomBarrier: true,
                   ),
                 ],
               ),
             ),
-            Container(
-              height: 15,
-              color: Colors.black,
-            ),
             Expanded(
               child: Container(
-                color: Colors.brown,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                color: Colors.white,
+                child: Stack(
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "0",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "SCORE",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 50,
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          "10",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "BEST",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 50,
-                        ),
-                      ],
+                    Positioned.fill(
+                      child: Image.asset(
+                        'lib/images/patti_potter_logo.png',
+                        width: MediaQuery.of(context).size.width * 0.1,
+                        fit: BoxFit.fitWidth,
+                      ),
                     ),
                   ],
                 ),
