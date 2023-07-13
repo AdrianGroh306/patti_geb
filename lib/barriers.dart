@@ -1,32 +1,20 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class MyBarrier extends StatelessWidget {
   final double barrierWidth;
   final double barrierHeight;
   final double barrierX;
   final bool isThisBottomBarrier;
-
   final String backgroundImage;
 
-  MyBarrier({super.key,
+  MyBarrier({
+    Key? key,
     required this.barrierWidth,
     required this.barrierHeight,
     required this.barrierX,
     required this.isThisBottomBarrier,
-  }) : backgroundImage = _getRandomBackgroundImage();
-
-  static String _getRandomBackgroundImage() {
-    final List<String> backgroundImages = [
-      'lib/images/tower_background_green.jpg',
-      'lib/images/tower_background_blue.jpg',
-      'lib/images/tower_background_yellow.jpg',
-      'lib/images/tower_background_red.jpg',
-    ];
-
-    final random = Random();
-    return backgroundImages[random.nextInt(backgroundImages.length)];
-  }
+    required this.backgroundImage,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,3 +37,4 @@ class MyBarrier extends StatelessWidget {
     );
   }
 }
+
