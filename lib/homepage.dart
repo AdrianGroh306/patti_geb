@@ -227,8 +227,10 @@ class _HomePageState extends State<HomePage>
               flex: 5,
               child: Stack(
                 children: [
+                 Image.asset(
+                      'lib/images/background_hogwarts.png'),
                   Container(
-                    color: Colors.grey,
+
                     child: MyPlayer(
                       playerY: playerY,
                       playerWidth: playerWidth,
