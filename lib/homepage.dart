@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage>
 
   // Barrier variables
   static List<double> barrierX = [2, 2 + 1.5];
-  static double barrierWidth = 0.5;
+  static double barrierWidth = 0.3;
   List<List<double>> barrierHeight = [
     // Between 0-2 height of screen & [topHeight, bottomHeight]
     [0.6, 0.4],
@@ -160,26 +160,63 @@ class _HomePageState extends State<HomePage>
           title: const Center(
             child: Text(
               "GAME OVER",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 30),
             ),
           ),
           actions: [
+          Column(
+             children: [
+               Row(mainAxisAlignment: MainAxisAlignment.center,
+                 children: [
+                   const Text("BEST ",style: TextStyle(
+                     color: Colors.white,
+                     fontSize: 15,
+                     fontWeight: FontWeight.bold,
+                   ),),
+                   Text(bestScore.toString(),style: const TextStyle(
+                     color: Colors.white,
+                     fontSize: 15,
+                     fontWeight: FontWeight.bold,
+                   ),),
+                 ],
+               ),
+               const SizedBox(height: 15,),
+               Row(mainAxisAlignment: MainAxisAlignment.center,
+                 children: [
+                   const Text("LAST ",style: TextStyle(
+                     color: Colors.white,
+                     fontSize: 20,
+                     fontWeight: FontWeight.bold,
+                   ),),
+                   Text(actualScore.toString(),style: const TextStyle(
+                     color: Colors.white,
+                     fontSize: 20,
+                     fontWeight: FontWeight.bold,
+                   ),),
+                 ],
+               )
+
+
+             ],
+           ),
+            const SizedBox(height: 30,),
             GestureDetector(
               onTap: resetGame,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Center(
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
                   child: Container(
-                    padding: const EdgeInsets.all(17),
+                    padding: const EdgeInsets.symmetric(horizontal: 60,vertical: 25),
                     color: Colors.white,
                     child: const Text(
                       "PLAY AGAIN",
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
               ),
             ),
+            const SizedBox(height: 15,)
           ],
         );
       },
@@ -341,10 +378,10 @@ class _HomePageState extends State<HomePage>
             ),
             Expanded(
               child: Container(
-                color: Color.fromRGBO(110, 220, 180, 1),
+                color: const Color.fromRGBO(110, 220, 180, 1),
                 child: Center(
                   child: Image.asset(
-                    'lib/images/patti_potter_logo.png',
+                    'lib/images/patti_potter_logo_glow.png',
                     width: MediaQuery.of(context).size.width * 0.6,
                     //fit: BoxFit.fitWidth,
                   ),
