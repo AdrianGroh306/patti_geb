@@ -12,7 +12,7 @@ class MyPlayer extends StatelessWidget {
     return Container(
       alignment: Alignment(0, (2* playerY + playerHeight) / (2-playerHeight)),
       child: Image.asset(
-        'lib/images/patti_potter.png',
+        'lib/images/patti_potter_white.png',
         height: MediaQuery.of(context).size.height *  3/4 * playerHeight / 2,
         width: MediaQuery.of(context).size.height * playerWidth / 2.5,
         fit: BoxFit.fill,

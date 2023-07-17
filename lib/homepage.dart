@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    startBlinkingText();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 50),
@@ -210,6 +211,17 @@ class _HomePageState extends State<HomePage>
     });
   }
 
+  bool isTextVisible = true;
+
+  void startBlinkingText() {
+    Timer.periodic(const Duration(milliseconds: 800), (timer) {
+      setState(() {
+        isTextVisible = !isTextVisible;
+      });
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -226,9 +238,11 @@ class _HomePageState extends State<HomePage>
             Expanded(
               flex: 5,
               child: Stack(
+
+                fit: StackFit.expand,
                 children: [
                  Image.asset(
-                      'lib/images/background_hogwarts.png'),
+                      'lib/images/background_hogwarts.png',fit: BoxFit.cover,),
                   Container(
 
                     child: MyPlayer(
@@ -244,14 +258,14 @@ class _HomePageState extends State<HomePage>
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 15, top: 20),
+                              padding: const EdgeInsets.only(left: 15, top: 32),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
                                     "BEST",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.grey,
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -260,8 +274,8 @@ class _HomePageState extends State<HomePage>
                                   Text(
                                     bestScore.toString(),
                                     style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
+                                      color: Colors.grey,
+                                      fontSize: 30,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -275,14 +289,14 @@ class _HomePageState extends State<HomePage>
                           child: Align(
                             alignment: Alignment.topRight,
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 15, top: 20),
+                              padding: const EdgeInsets.only(right: 15, top: 32),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   const Text(
                                     "SCORE",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.black,
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -291,8 +305,8 @@ class _HomePageState extends State<HomePage>
                                   Text(
                                     actualScore.toString(),
                                     style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
+                                      color: Colors.black,
+                                      fontSize: 30,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -308,21 +322,26 @@ class _HomePageState extends State<HomePage>
                   Positioned.fill(
                     child: Container(
                       alignment: const Alignment(0, -0.3),
-                      child: gameHasStarted
-                          ? const Text("")
-                          : const Text(
-                        "TAP TO PLAY",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      child: AnimatedOpacity(
+                        opacity: isTextVisible ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 500),
+                        child: gameHasStarted
+                            ? const Text("")
+                            : const Text(
+                          "TAP TO PLAY",
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
                       ),
                     ),
                   ),
+
                   ...buildBarriers(),
                 ],
               ),
             ),
             Expanded(
               child: Container(
-                color: Colors.white,
+                color: Color.fromRGBO(110, 220, 180, 1),
                 child: Center(
                   child: Image.asset(
                     'lib/images/patti_potter_logo.png',
