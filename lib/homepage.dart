@@ -16,8 +16,8 @@ class _HomePageState extends State<HomePage>
   static double playerY = 0.0;
   double time = 0;
   double height = 0;
-  double playerWidth = 0.2;
-  double playerHeight = 0.2;
+  double playerWidth = 0.25;
+  double playerHeight = 0.25;
   double initialHeight = playerY;
 
   // Game variables
@@ -27,16 +27,22 @@ class _HomePageState extends State<HomePage>
   int actualScore = 0;
 
   // Barrier variables
-  static List<double> barrierX = [2, 2 + 1.5];
+  late AnimationController _animationController;
+  static List<double> barrierX = [2, 2];
   static double barrierWidth = 0.3;
+  static double barrierSpeed = 0.01;
   List<List<double>> barrierHeight = [
     // Between 0-2 height of screen & [topHeight, bottomHeight]
     [0.6, 0.4],
     [0.4, 0.6],
-  ];
+    [0.6, 0.4],
+    [0.4, 0.6],
+    [0.6, 0.4],
+    [0.4, 0.6],[0.6, 0.4],
+    [0.4, 0.6],[0.6, 0.4],
+    [0.4, 0.6],
 
-  late AnimationController _animationController;
-  static double barrierSpeed = 0.02; // Adjust this value to control the speed
+  ];
 
   @override
   void initState() {
@@ -44,7 +50,7 @@ class _HomePageState extends State<HomePage>
     startBlinkingText();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 50),
+      duration: const Duration(milliseconds: 1),
     )..addListener(() {
       setState(() {
         // Update barrierX positions if the game is not paused
@@ -52,14 +58,19 @@ class _HomePageState extends State<HomePage>
           barrierX[0] -= barrierSpeed;
           barrierX[1] -= barrierSpeed;
 
-          // Check if barriers have gone off-screen and reset their positions
+
           if (barrierX[0] < -2 - barrierWidth) {
             barrierX[0] = barrierX[1];
             barrierHeight[0] = barrierHeight[1];
+          } else {
+            barrierX[0] -= barrierSpeed;
           }
+
           if (barrierX[1] < -2 - barrierWidth) {
             barrierX[1] = barrierX[0];
             barrierHeight[1] = barrierHeight[0];
+          } else {
+            barrierX[1] -= barrierSpeed;
           }
         }
       });
@@ -97,12 +108,9 @@ class _HomePageState extends State<HomePage>
         if (playerIsDead()) {
           timer.cancel();
           gameHasStarted = false;
-          actualScore = 0;
           _showDialog();
         }
 
-        // Time counter
-        time += 0.05;
       }
     });
   }
@@ -142,8 +150,8 @@ class _HomePageState extends State<HomePage>
     for (int i = 0; i < barrierX.length; i++) {
       if (barrierX[i] <= playerWidth &&
           barrierX[i] + barrierWidth >= -playerWidth &&
-          (playerY <= -1 + barrierHeight[i][0] ||
-              playerY + playerHeight >= 1 - barrierHeight[i][1])) {
+          (playerY <= -1.2 + barrierHeight[i][0] ||
+              playerY + playerHeight >= 1.2 - barrierHeight[i][1])) {
         return true;
       }
     }
