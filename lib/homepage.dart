@@ -286,8 +286,11 @@ class _HomePageState extends State<HomePage>
 
                 fit: StackFit.expand,
                 children: [
-                 Image.asset(
-                      'lib/images/background_hogwarts.png',fit: BoxFit.cover,),
+                 FittedBox(
+                   fit: BoxFit.fill,
+                   child: Image.asset(
+                        'lib/images/background_hogwarts.png',fit: BoxFit.cover,),
+                 ),
                   Container(
 
                     child: MyPlayer(
