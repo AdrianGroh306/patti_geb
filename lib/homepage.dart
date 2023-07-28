@@ -243,10 +243,10 @@ class _HomePageState extends State<HomePage>
 
   List<Widget> buildBarriers() {
     final List<String> backgroundImages = [
-      'lib/images/tower_background_green.jpg',
-      'lib/images/tower_background_blue.jpg',
+      'lib/images/tower_background_blue.png',
+      /*'lib/images/tower_background_blue.png',
       'lib/images/tower_background_yellow.jpg',
-      'lib/images/tower_background_red.jpg',
+      'lib/images/tower_background_red.jpg',*/
     ];
 
     return List.generate(barrierX.length, (index) {
