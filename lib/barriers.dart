@@ -40,7 +40,7 @@ class MyBarrier extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(backgroundImage),
-                fit: BoxFit.fill,
+                fit: BoxFit.fitWidth,
               ),
               borderRadius: BorderRadius.circular(3),
             ),

@@ -89,11 +89,12 @@ class _HomePageState extends State<HomePage>
     isGamePaused = false;
     _animationController.repeat(); // Start the barrier animation
     Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+      if(playerIsDead() == false){
       if (!isGamePaused) {
         setState(() {
           actualScore++; // Increment the actual score every second
         });
-      }
+      }}
     });
 
     Timer.periodic(const Duration(milliseconds: 50), (timer) {
