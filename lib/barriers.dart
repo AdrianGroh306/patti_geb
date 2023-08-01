@@ -32,8 +32,8 @@ class MyBarrier extends StatelessWidget {
         child: GlowContainer(
           // Use GlowContainer to wrap the existing barrier
           glowColor: Colors.white, // Set the glow color to white
-          borderRadius: BorderRadius.circular(10),
-          spreadRadius: 3, // Control the spread radius of the glow effect
+          //borderRadius: BorderRadius.circular(5),
+          spreadRadius: 5, // Control the spread radius of the glow effect
           child: Container(
             width: MediaQuery.of(context).size.width * barrierWidth / 1.8,
             height: MediaQuery.of(context).size.height * 3 / 4 * barrierHeight / 2,
@@ -42,7 +42,7 @@ class MyBarrier extends StatelessWidget {
                 image: AssetImage(backgroundImage),
                 fit: BoxFit.fill,
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(3),
             ),
           ),
         ),

@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage>
     startBlinkingText();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1),
+      duration: const Duration(microseconds: 1),
     )..addListener(() {
       setState(() {
         // Update barrierX positions if the game is not paused
@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage>
     gameHasStarted = true;
     isGamePaused = false;
     _animationController.repeat(); // Start the barrier animation
-    Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+    Timer.periodic(const Duration(seconds: 2), (Timer timer) {
       if (!isGamePaused) {
         setState(() {
           actualScore++; // Increment the actual score every second
@@ -168,30 +168,32 @@ class _HomePageState extends State<HomePage>
           title: const Center(
             child: Text(
               "GAME OVER",
-              style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 30),
+              style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 40),
             ),
           ),
           actions: [
           Column(
              children: [
-               Row(mainAxisAlignment: MainAxisAlignment.center,
+               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
                    const Text("BEST ",style: TextStyle(
                      color: Colors.white,
-                     fontSize: 15,
+                     fontSize: 20,
                      fontWeight: FontWeight.bold,
                    ),),
                    Text(bestScore.toString(),style: const TextStyle(
                      color: Colors.white,
-                     fontSize: 15,
+                     fontSize: 20,
                      fontWeight: FontWeight.bold,
                    ),),
                  ],
                ),
-               const SizedBox(height: 15,),
-               Row(mainAxisAlignment: MainAxisAlignment.center,
+               const SizedBox(height: 25,),
+               Image.asset("lib/images/dobby.png",height: 100,width: 100,),
+               const SizedBox(height: 20,),
+               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
-                   const Text("LAST ",style: TextStyle(
+                   const Text("Score ",style: TextStyle(
                      color: Colors.white,
                      fontSize: 20,
                      fontWeight: FontWeight.bold,
@@ -218,7 +220,7 @@ class _HomePageState extends State<HomePage>
                     color: Colors.white,
                     child: const Text(
                       "PLAY AGAIN",
-                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 20),
                     ),
                   ),
                 ),
