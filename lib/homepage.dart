@@ -86,6 +86,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     setState(() {
       time = 0;
       initialHeight = playerY;
+
     });
   }
 
@@ -111,7 +112,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (!isGamePaused) {
         time += 0.05;
-        height = -3 * time * time + 2 * time;
+        height = -2.5 * time * time + 2 * time;
         setState(() {
           playerY = initialHeight - height;
         });
