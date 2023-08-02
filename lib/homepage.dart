@@ -29,14 +29,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   // Barrier variables
   late AnimationController _animationController;
   bool isBarrierAnimationPaused = false; // New variable to track whether barrier animation is paused
-  static List<double> barrierX = [2, 2];
+  static List<double> barrierX = [2, 3];
   static double barrierWidth = 0.3;
   static double barrierSpeed = 0.01;
   List<List<double>> barrierHeight = [
     // Between 0-2 height of screen & [topHeight, bottomHeight]
-    [0.6, 0.6],
-    [0.4, 0.6],
+    [0.8, 0.8],
+    [1.2, 0.4],
   ];
+
+  // Create a list to keep track of used background images
+  List<String> usedBackgroundImages = [];
 
   @override
   void initState() {
@@ -140,11 +143,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       actualScore = 0;
 
       // Reset barrier positions and heights
-      barrierX = [2, 2 + 1.5];
+      barrierX = [2, 3];
       barrierHeight = [
-        [0.6, 0.4],
-        [0.4, 0.6],
+        [0.8, 0.8],
+        [1.2, 0.4],
       ];
+
+      // Clear used background images list
+      usedBackgroundImages.clear();
     });
   }
 
@@ -269,10 +275,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   List<Widget> buildBarriers() {
     final List<String> backgroundImages = [
-     // 'lib/images/tower_background_blue.png',
       'lib/images/tower_background_green.png',
-   // 'lib/images/tower_background_gelb.png',
-    //'lib/images/tower_background_red.png',
+      'lib/images/tower_background_blue.png',
+      'lib/images/tower_background_gelb.png',
+      'lib/images/tower_background_red.png',
     ];
 
     List<Widget> barriers = [];
@@ -288,8 +294,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     // Iterate through the barrierX list and create barriers
     for (int i = 0; i < barrierX.length; i++) {
-      final randomIndex = Random().nextInt(backgroundImages.length);
-      final backgroundImage = backgroundImages[randomIndex];
+      String backgroundImage;
+
+      // If there are unused background images, use one from the list
+      if (usedBackgroundImages.length < backgroundImages.length) {
+        do {
+          backgroundImage = backgroundImages[Random().nextInt(backgroundImages.length)];
+        } while (usedBackgroundImages.contains(backgroundImage));
+      }
+      // Otherwise, start reusing background images
+      else {
+        backgroundImage = usedBackgroundImages[i % usedBackgroundImages.length];
+      }
+
+      // Keep track of used background images
+      usedBackgroundImages.add(backgroundImage);
 
       barriers.add(buildBarrier(
         barrierX[i],
