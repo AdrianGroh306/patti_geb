@@ -5,7 +5,7 @@ class MyPlayer extends StatelessWidget {
   final double playerWidth;
   final double playerHeight;
 
-  const MyPlayer({this.playerY,required this.playerWidth,required this.playerHeight});
+  const MyPlayer({super.key, this.playerY,required this.playerWidth,required this.playerHeight});
 
   @override
   Widget build(BuildContext context) {

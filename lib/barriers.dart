@@ -8,7 +8,7 @@ class MyBarrier extends StatelessWidget {
   final bool isThisBottomBarrier;
   final String backgroundImage;
 
-  MyBarrier({
+  const MyBarrier({
     Key? key,
     required this.barrierWidth,
     required this.barrierHeight,
