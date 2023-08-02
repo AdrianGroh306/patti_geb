@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   bool isGamePaused = false;
   int bestScore = 0;
   int actualScore = 0;
+  Timer? _scoreIncrementTimer;
 
   // Barrier variables
   late AnimationController _animationController;
@@ -90,7 +91,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     isGamePaused = false;
     isBarrierAnimationPaused = false; // Reset barrier animation pause state
     _animationController.repeat(); // Start the barrier animation
-    Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+
+    // Cancel the existing score increment timer if it exists
+    _scoreIncrementTimer?.cancel();
+
+    _scoreIncrementTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       if (playerIsDead() == false) {
         if (!isGamePaused) {
           setState(() {
