@@ -269,10 +269,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   List<Widget> buildBarriers() {
     final List<String> backgroundImages = [
-      'lib/images/tower_background_blue.png',
-      /*'lib/images/tower_background_blue.png',
-    'lib/images/tower_background_yellow.jpg',
-    'lib/images/tower_background_red.jpg',*/
+     // 'lib/images/tower_background_blue.png',
+      'lib/images/tower_background_green.png',
+   // 'lib/images/tower_background_gelb.png',
+    //'lib/images/tower_background_red.png',
     ];
 
     List<Widget> barriers = [];
